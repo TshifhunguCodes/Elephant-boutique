@@ -60,9 +60,9 @@ const roomsData = [
             "Ironing facilities"
         ],
         images: [
-            "room1-1.jpg",
-            "room1-2.jpg",
-            "room1-3.jpg"
+            "images/p3.webp",
+            "images/p4.jpg",
+            "images/p7.webp"
         ],
         badge: "Popular"
     },
@@ -70,7 +70,7 @@ const roomsData = [
         id: 2,
         title: "Standard King Room",
         description: "Elegant room with a comfortable king-size bed, ideal for couples or solo travelers seeking extra space.",
-        price: "ZAR 950",
+        price: "ZAR 1200",
         priceDetail: "per night",
         features: [
             "1 king-size bed",
@@ -91,9 +91,9 @@ const roomsData = [
             "Ironing facilities"
         ],
         images: [
-            "room2-1.jpg",
-            "room2-2.jpg",
-            "room2-3.jpg"
+            "images/p1.jpg",
+            "images/p2.jpg",
+            "images/p4.jpg"
         ],
         badge: "Couples Choice"
     }
@@ -103,6 +103,9 @@ const roomsData = [
 function createRoomCards() {
     const roomsGrid = document.getElementById('rooms-grid');
     
+    // Clear any existing content to prevent duplicates
+    roomsGrid.innerHTML = '';
+    
     roomsData.forEach(room => {
         const roomCard = document.createElement('div');
         roomCard.className = 'room-card';
@@ -110,8 +113,13 @@ function createRoomCards() {
         
         roomCard.innerHTML = `
             <div class="room-image">
-                <i class="fas fa-image"></i>
-                <p>Room ${room.id} Image</p>
+                <div class="room-image-container">
+                    <img src="${room.images[0]}" alt="${room.title}" class="room-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="image-placeholder" style="display: none;">
+                        <i class="fas fa-image"></i>
+                        <p>${room.title} Image</p>
+                    </div>
+                </div>
                 ${room.badge ? `<div class="room-badge">${room.badge}</div>` : ''}
             </div>
             <div class="room-content">
@@ -155,7 +163,7 @@ function createRoomCards() {
         button.addEventListener('click', function() {
             const roomId = this.getAttribute('data-room-id');
             const room = roomsData.find(r => r.id == roomId);
-            alert(`Booking ${room.title} for ZAR 950 per night. You will be redirected to the booking page.`);
+            alert(`Booking ${room.title} for ${room.price} per night. You will be redirected to the booking page.`);
         });
     });
 }
@@ -173,19 +181,25 @@ function openRoomModal(roomId) {
             <div class="room-modal-content">
                 <div class="room-modal-gallery">
                     <div class="room-modal-main-image">
-                        <i class="fas fa-image"></i>
-                        <p>${room.title} - Main Image</p>
+                        <div class="modal-image-container">
+                            <img src="${room.images[0]}" alt="${room.title}" class="modal-main-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="image-placeholder" style="display: none;">
+                                <i class="fas fa-image"></i>
+                                <p>${room.title} - Main Image</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="room-modal-thumbnails">
-                        <div class="room-modal-thumbnail active">
-                            <i class="fas fa-image"></i>
-                        </div>
-                        <div class="room-modal-thumbnail">
-                            <i class="fas fa-image"></i>
-                        </div>
-                        <div class="room-modal-thumbnail">
-                            <i class="fas fa-image"></i>
-                        </div>
+                        ${room.images.map((image, index) => `
+                            <div class="room-modal-thumbnail ${index === 0 ? 'active' : ''}" data-image="${image}">
+                                <div class="thumbnail-container">
+                                    <img src="${image}" alt="${room.title} - Image ${index + 1}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="image-placeholder" style="display: none;">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
                 <div class="room-modal-details">
@@ -220,7 +234,7 @@ function openRoomModal(roomId) {
         
         // Add event listener to modal book button
         modalBody.querySelector('.book-button').addEventListener('click', function() {
-            alert(`Booking ${room.title} for ZAR 950 per night. You will be redirected to complete your booking.`);
+            alert(`Booking ${room.title} for ${room.price} per night. You will be redirected to complete your booking.`);
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
         });
@@ -233,15 +247,21 @@ function openRoomModal(roomId) {
         
         // Add event listeners to thumbnail images
         const thumbnails = modalBody.querySelectorAll('.room-modal-thumbnail');
-        thumbnails.forEach((thumb, index) => {
+        thumbnails.forEach((thumb) => {
             thumb.addEventListener('click', function() {
                 // Remove active class from all thumbnails
                 thumbnails.forEach(t => t.classList.remove('active'));
                 // Add active class to clicked thumbnail
                 this.classList.add('active');
-                // Update main image (in real implementation, this would change the image)
-                const mainImage = modalBody.querySelector('.room-modal-main-image');
-                mainImage.innerHTML = `<i class="fas fa-image"></i><p>${room.title} - Image ${index + 1}</p>`;
+                // Update main image
+                const imageSrc = this.getAttribute('data-image');
+                const mainImage = modalBody.querySelector('.modal-main-img');
+                const mainPlaceholder = modalBody.querySelector('.room-modal-main-image .image-placeholder');
+                
+                mainImage.src = imageSrc;
+                mainImage.alt = `${room.title} - Selected Image`;
+                mainImage.style.display = 'block';
+                if (mainPlaceholder) mainPlaceholder.style.display = 'none';
             });
         });
     }
@@ -261,9 +281,260 @@ window.addEventListener('click', function(event) {
     }
 });
 
-// Initialize when DOM is loaded
+// Enhanced Title Animation with Particles
+function createTitleParticles() {
+    const heroText = document.querySelector('.hero-text');
+    if (!heroText) return;
+    
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'title-particles';
+    heroText.appendChild(particlesContainer);
+
+    // Create particles
+    for (let i = 0; i < 15; i++) {
+        createParticle(particlesContainer);
+    }
+}
+
+function createParticle(container) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    
+    // Random position
+    const left = Math.random() * 100;
+    const top = Math.random() * 100;
+    
+    // Random delay
+    const delay = Math.random() * 5;
+    
+    particle.style.left = `${left}%`;
+    particle.style.top = `${top}%`;
+    particle.style.animationDelay = `${delay}s`;
+    particle.style.opacity = '0';
+    
+    // Random size
+    const size = 2 + Math.random() * 3;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    
+    container.appendChild(particle);
+}
+
+// Enhanced title reveal with typewriter effect
+function enhanceTitleAnimation() {
+    const titleLines = document.querySelectorAll('.title-line');
+    
+    titleLines.forEach((line, index) => {
+        const text = line.textContent;
+        line.textContent = '';
+        
+        // Create typewriter effect
+        let charIndex = 0;
+        const typeWriter = () => {
+            if (charIndex < text.length) {
+                line.textContent += text.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, 100);
+            }
+        };
+        
+        // Start typewriter after initial reveal
+        setTimeout(typeWriter, index * 800 + 300);
+    });
+}
+
+// Interactive title hover effects
+function addTitleInteractivity() {
+    const titleLines = document.querySelectorAll('.title-line');
+    
+    titleLines.forEach(line => {
+        line.addEventListener('mouseenter', () => {
+            line.style.transform = 'scale(1.05)';
+            line.style.textShadow = '4px 4px 8px rgba(0, 0, 0, 0.7), 0 0 25px rgba(210, 105, 30, 0.8)';
+            line.style.transition = 'all 0.3s ease';
+        });
+        
+        line.addEventListener('mouseleave', () => {
+            line.style.transform = 'scale(1)';
+            line.style.textShadow = '3px 3px 6px rgba(0, 0, 0, 0.5)';
+        });
+    });
+}
+
+// Initialize enhanced title animations
+function initEnhancedTitle() {
+    createTitleParticles();
+    // enhanceTitleAnimation(); // Uncomment for typewriter effect
+    addTitleInteractivity();
+}
+
+// Enhanced Logo Animation System
+function initEnhancedLogo() {
+    createLogoParticles();
+    setupLogoInteractions();
+    addLogoCharacters();
+}
+
+// Create floating particles around logo
+function createLogoParticles() {
+    const logoMain = document.querySelector('.logo-main');
+    if (!logoMain) return;
+    
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'logo-particles';
+    logoMain.appendChild(particlesContainer);
+
+    // Create 8 particles around the logo
+    for (let i = 0; i < 8; i++) {
+        createLogoParticle(particlesContainer, i);
+    }
+}
+
+function createLogoParticle(container, index) {
+    const particle = document.createElement('div');
+    particle.className = 'logo-particle';
+    
+    // Position particles around the logo
+    const angle = (index / 8) * Math.PI * 2;
+    const distance = 30;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance;
+    
+    particle.style.setProperty('--tx', `${tx}px`);
+    particle.style.setProperty('--ty', `${ty}px`);
+    
+    // Random delay and duration
+    const delay = Math.random() * 3;
+    const duration = 3 + Math.random() * 2;
+    
+    particle.style.animationDelay = `${delay}s`;
+    particle.style.animationDuration = `${duration}s`;
+    
+    // Random size and color variation
+    const size = 2 + Math.random() * 2;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    
+    // Color variation
+    const colors = ['#8B4513', '#8B4513', '#8B4513', '#A0522D'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    particle.style.background = color;
+    
+    container.appendChild(particle);
+}
+
+// Setup logo hover and click interactions
+function setupLogoInteractions() {
+    const logoMain = document.querySelector('.logo-main');
+    if (!logoMain) return;
+    
+    // Enhanced hover effects
+    logoMain.addEventListener('mouseenter', () => {
+        logoMain.classList.add('hover');
+        triggerLogoAnimation();
+    });
+    
+    logoMain.addEventListener('mouseleave', () => {
+        logoMain.classList.remove('hover');
+    });
+    
+    // Click animation
+    logoMain.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerLogoClickAnimation();
+        
+        // Scroll to top with smooth animation
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Add keyboard navigation
+    logoMain.setAttribute('tabindex', '0');
+    logoMain.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            triggerLogoClickAnimation();
+        }
+    });
+}
+
+// Add individual character spans for letter animations
+function addLogoCharacters() {
+    const logoText = document.querySelector('.logo-text');
+    if (!logoText) return;
+    
+    const text = logoText.textContent;
+    logoText.innerHTML = '';
+    
+    // Create span for each character
+    for (let i = 0; i < text.length; i++) {
+        const charSpan = document.createElement('span');
+        charSpan.className = 'logo-char';
+        charSpan.textContent = text[i];
+        charSpan.style.animationDelay = `${i * 0.1}s`;
+        logoText.appendChild(charSpan);
+    }
+}
+
+// Trigger special logo animation
+function triggerLogoAnimation() {
+    const logoChars = document.querySelectorAll('.logo-char');
+    
+    logoChars.forEach((char, index) => {
+        setTimeout(() => {
+            char.style.animation = 'charBounce 0.6s ease';
+            setTimeout(() => {
+                char.style.animation = '';
+            }, 600);
+        }, index * 50);
+    });
+}
+
+// Logo click animation sequence
+function triggerLogoClickAnimation() {
+    const logoMain = document.querySelector('.logo-main');
+    if (!logoMain) return;
+    
+    // Add loading state
+    logoMain.classList.add('loading');
+    
+    // Simulate loading completion
+    setTimeout(() => {
+        logoMain.classList.remove('loading');
+        logoMain.classList.add('success');
+        
+        // Reset after animation
+        setTimeout(() => {
+            logoMain.classList.remove('success');
+        }, 1000);
+    }, 800);
+}
+
+// Logo scroll effect - subtle scale on scroll
+function initLogoScrollEffect() {
+    const logoMain = document.querySelector('.logo-main');
+    if (!logoMain) return;
+    
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        const scale = Math.max(0.9, 1 - scrollY / 1000);
+        
+        logoMain.style.transform = `scale(${scale})`;
+        logoMain.style.opacity = Math.max(0.7, 1 - scrollY / 500);
+    });
+}
+
+// Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize rooms (ONLY ONCE)
     createRoomCards();
+    
+    // Initialize animations
+    initEnhancedTitle();
+    initEnhancedLogo();
+    initLogoScrollEffect();
     
     // Add smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -383,307 +654,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-
-
-
-// Enhanced Title Animation with Particles
-function createTitleParticles() {
-    const heroText = document.querySelector('.hero-text');
-    const particlesContainer = document.createElement('div');
-    particlesContainer.className = 'title-particles';
-    heroText.appendChild(particlesContainer);
-
-    // Create particles
-    for (let i = 0; i < 15; i++) {
-        createParticle(particlesContainer);
-    }
-}
-
-function createParticle(container) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
+// Facilities Image Loading Handler
+function loadFacilitiesImage() {
+    const facilitiesImage = document.querySelector('.facilities-image .about-img');
+    if (!facilitiesImage) return;
     
-    // Random position
-    const left = Math.random() * 100;
-    const top = Math.random() * 100;
+    const placeholder = facilitiesImage.parentElement;
     
-    // Random delay
-    const delay = Math.random() * 5;
+    // Create new image to preload
+    const loader = new Image();
+    loader.src = facilitiesImage.src;
     
-    particle.style.left = `${left}%`;
-    particle.style.top = `${top}%`;
-    particle.style.animationDelay = `${delay}s`;
-    particle.style.opacity = '0';
+    loader.onload = function() {
+        facilitiesImage.classList.add('loaded');
+        console.log('Facilities image loaded successfully');
+    };
     
-    // Random size
-    const size = 2 + Math.random() * 3;
-    particle.style.width = `${size}px`;
-    particle.style.height = `${size}px`;
-    
-    container.appendChild(particle);
-}
-
-// Enhanced title reveal with typewriter effect
-function enhanceTitleAnimation() {
-    const titleLines = document.querySelectorAll('.title-line');
-    
-    titleLines.forEach((line, index) => {
-        const text = line.textContent;
-        line.textContent = '';
-        
-        // Create typewriter effect
-        let charIndex = 0;
-        const typeWriter = () => {
-            if (charIndex < text.length) {
-                line.textContent += text.charAt(charIndex);
-                charIndex++;
-                setTimeout(typeWriter, 100);
-            }
-        };
-        
-        // Start typewriter after initial reveal
-        setTimeout(typeWriter, index * 800 + 300);
-    });
-}
-
-// Interactive title hover effects
-function addTitleInteractivity() {
-    const titleLines = document.querySelectorAll('.title-line');
-    
-    titleLines.forEach(line => {
-        line.addEventListener('mouseenter', () => {
-            line.style.transform = 'scale(1.05)';
-            line.style.textShadow = '4px 4px 8px rgba(0, 0, 0, 0.7), 0 0 25px rgba(210, 105, 30, 0.8)';
-            line.style.transition = 'all 0.3s ease';
-        });
-        
-        line.addEventListener('mouseleave', () => {
-            line.style.transform = 'scale(1)';
-            line.style.textShadow = '3px 3px 6px rgba(0, 0, 0, 0.5)';
-        });
-    });
-}
-
-// Initialize enhanced title animations
-function initEnhancedTitle() {
-    createTitleParticles();
-    // enhanceTitleAnimation(); // Uncomment for typewriter effect
-    addTitleInteractivity();
-}
-
-// Update the DOMContentLoaded event listener
-document.addEventListener('DOMContentLoaded', () => {
-    createRoomCards();
-    initEnhancedTitle(); // Add this line
-    
-    // ... rest of your existing initialization code
-});
-
-
-// Enhanced Logo Animation System
-function initEnhancedLogo() {
-    createLogoParticles();
-    setupLogoInteractions();
-    addLogoCharacters();
-}
-
-// Create floating particles around logo
-function createLogoParticles() {
-    const logoMain = document.querySelector('.logo-main');
-    const particlesContainer = document.createElement('div');
-    particlesContainer.className = 'logo-particles';
-    logoMain.appendChild(particlesContainer);
-
-    // Create 8 particles around the logo
-    for (let i = 0; i < 8; i++) {
-        createLogoParticle(particlesContainer, i);
-    }
-}
-
-function createLogoParticle(container, index) {
-    const particle = document.createElement('div');
-    particle.className = 'logo-particle';
-    
-    // Position particles around the logo
-    const angle = (index / 8) * Math.PI * 2;
-    const distance = 30;
-    const tx = Math.cos(angle) * distance;
-    const ty = Math.sin(angle) * distance;
-    
-    particle.style.setProperty('--tx', `${tx}px`);
-    particle.style.setProperty('--ty', `${ty}px`);
-    
-    // Random delay and duration
-    const delay = Math.random() * 3;
-    const duration = 3 + Math.random() * 2;
-    
-    particle.style.animationDelay = `${delay}s`;
-    particle.style.animationDuration = `${duration}s`;
-    
-    // Random size and color variation
-    const size = 2 + Math.random() * 2;
-    particle.style.width = `${size}px`;
-    particle.style.height = `${size}px`;
-    
-    // Color variation
-    const colors = ['#8B4513', '#8B4513', '#8B4513', '#A0522D'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    particle.style.background = color;
-    
-    container.appendChild(particle);
-}
-
-// Setup logo hover and click interactions
-function setupLogoInteractions() {
-    const logoMain = document.querySelector('.logo-main');
-    const logoText = document.querySelector('.logo-text');
-    
-    // Enhanced hover effects
-    logoMain.addEventListener('mouseenter', () => {
-        logoMain.classList.add('hover');
-        triggerLogoAnimation();
-    });
-    
-    logoMain.addEventListener('mouseleave', () => {
-        logoMain.classList.remove('hover');
-    });
-    
-    // Click animation
-    logoMain.addEventListener('click', (e) => {
-        e.preventDefault();
-        triggerLogoClickAnimation();
-        
-        // Scroll to top with smooth animation
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    });
-    
-    // Add keyboard navigation
-    logoMain.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            triggerLogoClickAnimation();
+    loader.onerror = function() {
+        console.warn('Facilities image failed to load:', facilitiesImage.src);
+        facilitiesImage.style.display = 'none';
+        // Ensure the placeholder text is still visible
+        const caption = placeholder.querySelector('p');
+        if (caption) {
+            caption.style.background = 'var(--light-color)';
+            caption.style.color = 'var(--gray-color)';
         }
-    });
+    };
 }
 
-// Add individual character spans for letter animations
-function addLogoCharacters() {
-    const logoText = document.querySelector('.logo-text');
-    const text = logoText.textContent;
-    logoText.innerHTML = '';
-    
-    // Create span for each character
-    for (let i = 0; i < text.length; i++) {
-        const charSpan = document.createElement('span');
-        charSpan.className = 'logo-char';
-        charSpan.textContent = text[i];
-        charSpan.style.animationDelay = `${i * 0.1}s`;
-        logoText.appendChild(charSpan);
-    }
-}
-
-// Trigger special logo animation
-function triggerLogoAnimation() {
-    const logoChars = document.querySelectorAll('.logo-char');
-    
-    logoChars.forEach((char, index) => {
-        setTimeout(() => {
-            char.style.animation = 'charBounce 0.6s ease';
-            setTimeout(() => {
-                char.style.animation = '';
-            }, 600);
-        }, index * 50);
-    });
-}
-
-// Logo click animation sequence
-function triggerLogoClickAnimation() {
-    const logoMain = document.querySelector('.logo-main');
-    const logoText = document.querySelector('.logo-text');
-    
-    // Add loading state
-    logoMain.classList.add('loading');
-    
-    // Simulate loading completion
-    setTimeout(() => {
-        logoMain.classList.remove('loading');
-        logoMain.classList.add('success');
-        
-        // Reset after animation
-        setTimeout(() => {
-            logoMain.classList.remove('success');
-        }, 1000);
-    }, 800);
-}
-
-// Logo scroll effect - subtle scale on scroll
-function initLogoScrollEffect() {
-    const logoMain = document.querySelector('.logo-main');
-    
-    window.addEventListener('scroll', () => {
-        const scrollY = window.scrollY;
-        const scale = Math.max(0.9, 1 - scrollY / 1000);
-        
-        logoMain.style.transform = `scale(${scale})`;
-        logoMain.style.opacity = Math.max(0.7, 1 - scrollY / 500);
-    });
-}
-
-// Update DOMContentLoaded to include logo enhancements
+// Update your DOMContentLoaded to include this:
 document.addEventListener('DOMContentLoaded', () => {
     createRoomCards();
     initEnhancedTitle();
-    initEnhancedLogo(); // Add this line
-    initLogoScrollEffect(); // Add scroll effect
-    // ... rest of existing code
+    initEnhancedLogo();
+    initLogoScrollEffect();
+    loadFacilitiesImage(); // Add this line
+    // ... rest of your code
 });
-
-
-// Logo performance monitoring
-function monitorLogoPerformance() {
-    const logo = document.querySelector('.logo-main');
-    const observer = new PerformanceObserver((list) => {
-        list.getEntries().forEach((entry) => {
-            if (entry.name.includes('logo')) {
-                console.log('Logo animation performance:', entry);
-            }
-        });
-    });
-    
-    observer.observe({ entryTypes: ['animation'] });
-}
-
-// Logo theme adaptation
-function adaptLogoToTheme() {
-    const logo = document.querySelector('.logo-main');
-    
-    // Detect system theme
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    if (prefersDark.matches) {
-        logo.style.setProperty('--primary-color', '#8B4513');
-        logo.style.setProperty('--secondary-color', '#8B4513');
-    }
-}
-
-// Logo context menu
-function addLogoContextMenu() {
-    const logo = document.querySelector('.logo-main');
-    
-    logo.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        triggerLogoSpecialAnimation();
-    });
-}
-
-function triggerLogoSpecialAnimation() {
-    const logo = document.querySelector('.logo-main');
-    logo.style.animation = 'logoSpecial 2s ease forwards';
-    
-    setTimeout(() => {
-        logo.style.animation = '';
-    }, 2000);
-}
