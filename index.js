@@ -15,138 +15,147 @@ document.querySelectorAll('.nav-link').forEach(link => {
     });
 });
 
-// Room Data
+// Hero Slideshow
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+
+function showSlide(index) {
+    slides.forEach(slide => slide.classList.remove('active'));
+    slides[index].classList.add('active');
+}
+
+function nextSlide() {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    showSlide(currentSlide);
+}
+
+// Auto-advance slides every 5 seconds
+setInterval(nextSlide, 5000);
+
+// Room Data with Images
 const roomsData = [
     {
         id: 1,
         title: "Standard Twin Room",
+        description: "Comfortable and spacious room with two twin beds, perfect for friends or colleagues traveling together.",
+        price: "ZAR 950",
+        priceDetail: "per night",
         features: [
             "2 twin beds",
-            "20 m²",
+            "20 m² room size",
             "Air conditioning",
             "Private bathroom",
-            "Free Wifi",
+            "Free WiFi",
+            "Flat-screen TV",
             "Free toiletries",
-            "Shower",
-            "TV"
+            "Shower"
         ],
-        guests: "▲▲",
-        price: "ZAR 950",
-        taxes: "+ZAR 83 taxes and fees",
-        total: "ZAR 1,007",
-        options: [
-            {
-                type: "non-refundable",
-                label: "Non-refundable",
-                details: ["Pay online"]
-            },
-            {
-                type: "refundable",
-                label: "Fully refundable (by Booking.com) before November 28, 2025",
-                details: ["Can't combine with other offers", "Pay online"]
-            }
-        ]
+        amenities: [
+            "Tea/Coffee maker",
+            "Desk",
+            "Safe deposit box",
+            "Hairdryer",
+            "Wake-up service",
+            "Ironing facilities"
+        ],
+        images: [
+            "room1-1.jpg",
+            "room1-2.jpg",
+            "room1-3.jpg"
+        ],
+        badge: "Popular"
     },
     {
         id: 2,
         title: "Standard King Room",
+        description: "Elegant room with a comfortable king-size bed, ideal for couples or solo travelers seeking extra space.",
+        price: "ZAR 950",
+        priceDetail: "per night",
         features: [
-            "1 queen bed",
-            "20 m²",
+            "1 king-size bed",
+            "20 m² room size",
             "Air conditioning",
             "Private bathroom",
-            "Free Wifi",
+            "Free WiFi",
+            "Flat-screen TV",
             "Free toiletries",
-            "Shower",
-            "TV"
+            "Shower"
         ],
-        guests: "▲▲",
-        price: "ZAR 950",
-        taxes: "+ZAR 83 taxes and fees",
-        total: "ZAR 1,007",
-        options: [
-            {
-                type: "non-refundable",
-                label: "Non-refundable",
-                details: ["Pay online"]
-            },
-            {
-                type: "refundable",
-                label: "Fully refundable (by Booking.com) before November 28, 2025",
-                details: ["Can't combine with other offers", "Pay online"]
-            }
-        ]
+        amenities: [
+            "Tea/Coffee maker",
+            "Desk",
+            "Safe deposit box",
+            "Hairdryer",
+            "Wake-up service",
+            "Ironing facilities"
+        ],
+        images: [
+            "room2-1.jpg",
+            "room2-2.jpg",
+            "room2-3.jpg"
+        ],
+        badge: "Couples Choice"
     }
 ];
 
-// Function to create room booking cards
-function createRoomBookingCards() {
-    const roomsBooking = document.getElementById('rooms-booking');
+// Function to create room cards
+function createRoomCards() {
+    const roomsGrid = document.getElementById('rooms-grid');
     
     roomsData.forEach(room => {
-        room.options.forEach((option, optionIndex) => {
-            const roomCard = document.createElement('div');
-            roomCard.className = 'room-booking-card';
-            roomCard.setAttribute('data-room-id', room.id);
-            roomCard.setAttribute('data-option-index', optionIndex);
-            
-            roomCard.innerHTML = `
-                <div class="room-header">
-                    <h3 class="room-title">${room.title}</h3>
-                    <div class="room-features-list">
-                        ${room.features.map(feature => `<span>${feature}</span>`).join('')}
-                    </div>
-                </div>
-                <div class="room-body">
-                    <div class="room-guests">
-                        <span>${room.guests}</span>
-                        <span>Number of guests</span>
-                    </div>
-                    <div class="room-price">
-                        <span class="price-main">${room.price}</span>
-                        <span class="price-details">${room.taxes}</span>
-                        <span class="price-details">${room.total} total</span>
-                    </div>
-                    <div class="room-options">
-                        <div class="option-item ${option.type === 'non-refundable' ? 'non-refundable' : 'refundable'}">
-                            <span>${option.type === 'non-refundable' ? '☉' : '✓'}</span>
-                            <div>
-                                <div>${option.label}</div>
-                                ${option.details.map(detail => `<div style="font-size: 0.8rem; color: #666;">- ${detail}</div>`).join('')}
-                            </div>
+        const roomCard = document.createElement('div');
+        roomCard.className = 'room-card';
+        roomCard.setAttribute('data-room-id', room.id);
+        
+        roomCard.innerHTML = `
+            <div class="room-image">
+                <i class="fas fa-image"></i>
+                <p>Room ${room.id} Image</p>
+                ${room.badge ? `<div class="room-badge">${room.badge}</div>` : ''}
+            </div>
+            <div class="room-content">
+                <h3 class="room-title">${room.title}</h3>
+                <p class="room-description">${room.description}</p>
+                
+                <div class="room-features">
+                    ${room.features.slice(0, 4).map(feature => `
+                        <div class="room-feature">
+                            <i class="fas fa-check"></i>
+                            <span>${feature}</span>
                         </div>
-                    </div>
-                    <div class="room-select">
-                        <div class="select-checkbox" data-room-id="${room.id}" data-option-index="${optionIndex}"></div>
-                    </div>
+                    `).join('')}
                 </div>
-            `;
-            
-            roomsBooking.appendChild(roomCard);
+                
+                <div class="room-price">
+                    <span class="price-amount">${room.price}</span>
+                    <span class="price-detail">${room.priceDetail}</span>
+                </div>
+                
+                <div class="room-actions">
+                    <button class="view-details" data-room-id="${room.id}">View Details</button>
+                    <button class="book-now" data-room-id="${room.id}">Book Now</button>
+                </div>
+            </div>
+        `;
+        
+        roomsGrid.appendChild(roomCard);
+    });
+    
+    // Add event listeners to view details buttons
+    document.querySelectorAll('.view-details').forEach(button => {
+        button.addEventListener('click', function() {
+            const roomId = this.getAttribute('data-room-id');
+            openRoomModal(roomId);
         });
     });
     
-    // Add event listeners to select checkboxes
-    document.querySelectorAll('.select-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('click', function() {
+    // Add event listeners to book now buttons
+    document.querySelectorAll('.book-now').forEach(button => {
+        button.addEventListener('click', function() {
             const roomId = this.getAttribute('data-room-id');
-            const optionIndex = this.getAttribute('data-option-index');
-            
-            // Remove selection from all checkboxes
-            document.querySelectorAll('.select-checkbox').forEach(cb => {
-                cb.classList.remove('selected');
-            });
-            
-            // Add selection to clicked checkbox
-            this.classList.add('selected');
-            
-            // Show booking confirmation
             const room = roomsData.find(r => r.id == roomId);
-            const option = room.options[optionIndex];
-            
-            setTimeout(() => {
-                alert(`Selected: ${room.title}\nOption: ${option.label}\nPrice: ${room.total} total\n\nYou will be redirected to complete your booking.`);
-            }, 300);
+            alert(`Booking ${room.title} for ZAR 950 per night. You will be redirected to the booking page.`);
         });
     });
 }
@@ -154,6 +163,89 @@ function createRoomBookingCards() {
 // Modal functionality
 const modal = document.getElementById('room-modal');
 const closeModal = document.querySelector('.close-modal');
+const modalBody = document.getElementById('modal-body');
+
+function openRoomModal(roomId) {
+    const room = roomsData.find(r => r.id == roomId);
+    
+    if (room) {
+        modalBody.innerHTML = `
+            <div class="room-modal-content">
+                <div class="room-modal-gallery">
+                    <div class="room-modal-main-image">
+                        <i class="fas fa-image"></i>
+                        <p>${room.title} - Main Image</p>
+                    </div>
+                    <div class="room-modal-thumbnails">
+                        <div class="room-modal-thumbnail active">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="room-modal-thumbnail">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="room-modal-thumbnail">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="room-modal-details">
+                    <h2 class="room-modal-title">${room.title}</h2>
+                    <div class="room-modal-price">${room.price} <small>${room.priceDetail}</small></div>
+                    <p class="room-modal-description">${room.description}</p>
+                    
+                    <div class="room-modal-section">
+                        <h3>Room Features</h3>
+                        <ul class="room-features-grid">
+                            ${room.features.map(feature => `<li><i class="fas fa-check"></i> ${feature}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="room-modal-section">
+                        <h3>Additional Amenities</h3>
+                        <ul class="room-features-grid">
+                            ${room.amenities.map(amenity => `<li><i class="fas fa-check"></i> ${amenity}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="room-modal-actions">
+                        <button class="book-button">Book This Room</button>
+                        <button class="close-modal-btn">Close</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Add event listener to modal book button
+        modalBody.querySelector('.book-button').addEventListener('click', function() {
+            alert(`Booking ${room.title} for ZAR 950 per night. You will be redirected to complete your booking.`);
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Add event listener to modal close button
+        modalBody.querySelector('.close-modal-btn').addEventListener('click', function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Add event listeners to thumbnail images
+        const thumbnails = modalBody.querySelectorAll('.room-modal-thumbnail');
+        thumbnails.forEach((thumb, index) => {
+            thumb.addEventListener('click', function() {
+                // Remove active class from all thumbnails
+                thumbnails.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked thumbnail
+                this.classList.add('active');
+                // Update main image (in real implementation, this would change the image)
+                const mainImage = modalBody.querySelector('.room-modal-main-image');
+                mainImage.innerHTML = `<i class="fas fa-image"></i><p>${room.title} - Image ${index + 1}</p>`;
+            });
+        });
+    }
+}
 
 // Close modal when clicking the X
 closeModal.addEventListener('click', function() {
@@ -171,7 +263,7 @@ window.addEventListener('click', function(event) {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    createRoomBookingCards();
+    createRoomCards();
     
     // Add smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -219,13 +311,15 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const checkIn = document.getElementById('check-in').value;
             const checkOut = document.getElementById('check-out').value;
+            const roomType = document.getElementById('room-type').value;
             
             if (!checkIn || !checkOut) {
                 alert('Please select both check-in and check-out dates.');
                 return;
             }
             
-            alert(`Checking availability from ${checkIn} to ${checkOut}. You will be redirected to room selection.`);
+            const roomTypeText = roomType ? ` for ${document.getElementById('room-type').options[document.getElementById('room-type').selectedIndex].text}` : '';
+            alert(`Checking availability${roomTypeText} from ${checkIn} to ${checkOut}. You will be redirected to room selection.`);
         });
     }
     
@@ -262,4 +356,334 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+    
+    // Social media links
+    document.querySelectorAll('.social-icons a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('You will be redirected to our social media page.');
+        });
+    });
+    
+    // Footer links
+    document.querySelectorAll('.footer-links a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (link.getAttribute('href').startsWith('#')) {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    });
 });
+
+
+
+
+// Enhanced Title Animation with Particles
+function createTitleParticles() {
+    const heroText = document.querySelector('.hero-text');
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'title-particles';
+    heroText.appendChild(particlesContainer);
+
+    // Create particles
+    for (let i = 0; i < 15; i++) {
+        createParticle(particlesContainer);
+    }
+}
+
+function createParticle(container) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    
+    // Random position
+    const left = Math.random() * 100;
+    const top = Math.random() * 100;
+    
+    // Random delay
+    const delay = Math.random() * 5;
+    
+    particle.style.left = `${left}%`;
+    particle.style.top = `${top}%`;
+    particle.style.animationDelay = `${delay}s`;
+    particle.style.opacity = '0';
+    
+    // Random size
+    const size = 2 + Math.random() * 3;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    
+    container.appendChild(particle);
+}
+
+// Enhanced title reveal with typewriter effect
+function enhanceTitleAnimation() {
+    const titleLines = document.querySelectorAll('.title-line');
+    
+    titleLines.forEach((line, index) => {
+        const text = line.textContent;
+        line.textContent = '';
+        
+        // Create typewriter effect
+        let charIndex = 0;
+        const typeWriter = () => {
+            if (charIndex < text.length) {
+                line.textContent += text.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, 100);
+            }
+        };
+        
+        // Start typewriter after initial reveal
+        setTimeout(typeWriter, index * 800 + 300);
+    });
+}
+
+// Interactive title hover effects
+function addTitleInteractivity() {
+    const titleLines = document.querySelectorAll('.title-line');
+    
+    titleLines.forEach(line => {
+        line.addEventListener('mouseenter', () => {
+            line.style.transform = 'scale(1.05)';
+            line.style.textShadow = '4px 4px 8px rgba(0, 0, 0, 0.7), 0 0 25px rgba(210, 105, 30, 0.8)';
+            line.style.transition = 'all 0.3s ease';
+        });
+        
+        line.addEventListener('mouseleave', () => {
+            line.style.transform = 'scale(1)';
+            line.style.textShadow = '3px 3px 6px rgba(0, 0, 0, 0.5)';
+        });
+    });
+}
+
+// Initialize enhanced title animations
+function initEnhancedTitle() {
+    createTitleParticles();
+    // enhanceTitleAnimation(); // Uncomment for typewriter effect
+    addTitleInteractivity();
+}
+
+// Update the DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', () => {
+    createRoomCards();
+    initEnhancedTitle(); // Add this line
+    
+    // ... rest of your existing initialization code
+});
+
+
+// Enhanced Logo Animation System
+function initEnhancedLogo() {
+    createLogoParticles();
+    setupLogoInteractions();
+    addLogoCharacters();
+}
+
+// Create floating particles around logo
+function createLogoParticles() {
+    const logoMain = document.querySelector('.logo-main');
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'logo-particles';
+    logoMain.appendChild(particlesContainer);
+
+    // Create 8 particles around the logo
+    for (let i = 0; i < 8; i++) {
+        createLogoParticle(particlesContainer, i);
+    }
+}
+
+function createLogoParticle(container, index) {
+    const particle = document.createElement('div');
+    particle.className = 'logo-particle';
+    
+    // Position particles around the logo
+    const angle = (index / 8) * Math.PI * 2;
+    const distance = 30;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance;
+    
+    particle.style.setProperty('--tx', `${tx}px`);
+    particle.style.setProperty('--ty', `${ty}px`);
+    
+    // Random delay and duration
+    const delay = Math.random() * 3;
+    const duration = 3 + Math.random() * 2;
+    
+    particle.style.animationDelay = `${delay}s`;
+    particle.style.animationDuration = `${duration}s`;
+    
+    // Random size and color variation
+    const size = 2 + Math.random() * 2;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    
+    // Color variation
+    const colors = ['#8B4513', '#8B4513', '#8B4513', '#A0522D'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    particle.style.background = color;
+    
+    container.appendChild(particle);
+}
+
+// Setup logo hover and click interactions
+function setupLogoInteractions() {
+    const logoMain = document.querySelector('.logo-main');
+    const logoText = document.querySelector('.logo-text');
+    
+    // Enhanced hover effects
+    logoMain.addEventListener('mouseenter', () => {
+        logoMain.classList.add('hover');
+        triggerLogoAnimation();
+    });
+    
+    logoMain.addEventListener('mouseleave', () => {
+        logoMain.classList.remove('hover');
+    });
+    
+    // Click animation
+    logoMain.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerLogoClickAnimation();
+        
+        // Scroll to top with smooth animation
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Add keyboard navigation
+    logoMain.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            triggerLogoClickAnimation();
+        }
+    });
+}
+
+// Add individual character spans for letter animations
+function addLogoCharacters() {
+    const logoText = document.querySelector('.logo-text');
+    const text = logoText.textContent;
+    logoText.innerHTML = '';
+    
+    // Create span for each character
+    for (let i = 0; i < text.length; i++) {
+        const charSpan = document.createElement('span');
+        charSpan.className = 'logo-char';
+        charSpan.textContent = text[i];
+        charSpan.style.animationDelay = `${i * 0.1}s`;
+        logoText.appendChild(charSpan);
+    }
+}
+
+// Trigger special logo animation
+function triggerLogoAnimation() {
+    const logoChars = document.querySelectorAll('.logo-char');
+    
+    logoChars.forEach((char, index) => {
+        setTimeout(() => {
+            char.style.animation = 'charBounce 0.6s ease';
+            setTimeout(() => {
+                char.style.animation = '';
+            }, 600);
+        }, index * 50);
+    });
+}
+
+// Logo click animation sequence
+function triggerLogoClickAnimation() {
+    const logoMain = document.querySelector('.logo-main');
+    const logoText = document.querySelector('.logo-text');
+    
+    // Add loading state
+    logoMain.classList.add('loading');
+    
+    // Simulate loading completion
+    setTimeout(() => {
+        logoMain.classList.remove('loading');
+        logoMain.classList.add('success');
+        
+        // Reset after animation
+        setTimeout(() => {
+            logoMain.classList.remove('success');
+        }, 1000);
+    }, 800);
+}
+
+// Logo scroll effect - subtle scale on scroll
+function initLogoScrollEffect() {
+    const logoMain = document.querySelector('.logo-main');
+    
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        const scale = Math.max(0.9, 1 - scrollY / 1000);
+        
+        logoMain.style.transform = `scale(${scale})`;
+        logoMain.style.opacity = Math.max(0.7, 1 - scrollY / 500);
+    });
+}
+
+// Update DOMContentLoaded to include logo enhancements
+document.addEventListener('DOMContentLoaded', () => {
+    createRoomCards();
+    initEnhancedTitle();
+    initEnhancedLogo(); // Add this line
+    initLogoScrollEffect(); // Add scroll effect
+    // ... rest of existing code
+});
+
+
+// Logo performance monitoring
+function monitorLogoPerformance() {
+    const logo = document.querySelector('.logo-main');
+    const observer = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+            if (entry.name.includes('logo')) {
+                console.log('Logo animation performance:', entry);
+            }
+        });
+    });
+    
+    observer.observe({ entryTypes: ['animation'] });
+}
+
+// Logo theme adaptation
+function adaptLogoToTheme() {
+    const logo = document.querySelector('.logo-main');
+    
+    // Detect system theme
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    if (prefersDark.matches) {
+        logo.style.setProperty('--primary-color', '#8B4513');
+        logo.style.setProperty('--secondary-color', '#8B4513');
+    }
+}
+
+// Logo context menu
+function addLogoContextMenu() {
+    const logo = document.querySelector('.logo-main');
+    
+    logo.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        triggerLogoSpecialAnimation();
+    });
+}
+
+function triggerLogoSpecialAnimation() {
+    const logo = document.querySelector('.logo-main');
+    logo.style.animation = 'logoSpecial 2s ease forwards';
+    
+    setTimeout(() => {
+        logo.style.animation = '';
+    }, 2000);
+}
