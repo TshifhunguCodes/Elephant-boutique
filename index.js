@@ -15,6 +15,14 @@ document.querySelectorAll('.nav-link').forEach(link => {
     });
 });
 
+// Close mobile menu when clicking on CTA button
+document.querySelectorAll('.nav-cta').forEach(button => {
+    button.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+    });
+});
+
 // Hero Slideshow
 let currentSlide = 0;
 const slides = document.querySelectorAll('.slide');
@@ -31,7 +39,17 @@ function nextSlide() {
 }
 
 // Auto-advance slides every 5 seconds
-setInterval(nextSlide, 5000);
+let slideInterval = setInterval(nextSlide, 5000);
+
+// Pause slideshow when user interacts with it
+const heroSection = document.querySelector('.hero');
+heroSection.addEventListener('mouseenter', () => {
+    clearInterval(slideInterval);
+});
+
+heroSection.addEventListener('mouseleave', () => {
+    slideInterval = setInterval(nextSlide, 5000);
+});
 
 // Room Data with Images
 const roomsData = [
@@ -114,7 +132,7 @@ function createRoomCards() {
         roomCard.innerHTML = `
             <div class="room-image">
                 <div class="room-image-container">
-                    <img src="${room.images[0]}" alt="${room.title}" class="room-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <img src="${room.images[0]}" alt="${room.title}" class="room-img" onerror="handleImageError(this)">
                     <div class="image-placeholder" style="display: none;">
                         <i class="fas fa-image"></i>
                         <p>${room.title} Image</p>
@@ -164,8 +182,19 @@ function createRoomCards() {
             const roomId = this.getAttribute('data-room-id');
             const room = roomsData.find(r => r.id == roomId);
             alert(`Booking ${room.title} for ${room.price} per night. You will be redirected to the booking page.`);
+            // In a real implementation, you would redirect to a booking page
+            // window.location.href = `booking.html?room=${roomId}`;
         });
     });
+}
+
+// Handle image loading errors
+function handleImageError(img) {
+    img.style.display = 'none';
+    const placeholder = img.nextElementSibling;
+    if (placeholder) {
+        placeholder.style.display = 'flex';
+    }
 }
 
 // Modal functionality
@@ -182,7 +211,7 @@ function openRoomModal(roomId) {
                 <div class="room-modal-gallery">
                     <div class="room-modal-main-image">
                         <div class="modal-image-container">
-                            <img src="${room.images[0]}" alt="${room.title}" class="modal-main-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <img src="${room.images[0]}" alt="${room.title}" class="modal-main-img" onerror="handleImageError(this)">
                             <div class="image-placeholder" style="display: none;">
                                 <i class="fas fa-image"></i>
                                 <p>${room.title} - Main Image</p>
@@ -193,7 +222,7 @@ function openRoomModal(roomId) {
                         ${room.images.map((image, index) => `
                             <div class="room-modal-thumbnail ${index === 0 ? 'active' : ''}" data-image="${image}">
                                 <div class="thumbnail-container">
-                                    <img src="${image}" alt="${room.title} - Image ${index + 1}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <img src="${image}" alt="${room.title} - Image ${index + 1}" onerror="handleImageError(this)">
                                     <div class="image-placeholder" style="display: none;">
                                         <i class="fas fa-image"></i>
                                     </div>
@@ -320,29 +349,6 @@ function createParticle(container) {
     container.appendChild(particle);
 }
 
-// Enhanced title reveal with typewriter effect
-function enhanceTitleAnimation() {
-    const titleLines = document.querySelectorAll('.title-line');
-    
-    titleLines.forEach((line, index) => {
-        const text = line.textContent;
-        line.textContent = '';
-        
-        // Create typewriter effect
-        let charIndex = 0;
-        const typeWriter = () => {
-            if (charIndex < text.length) {
-                line.textContent += text.charAt(charIndex);
-                charIndex++;
-                setTimeout(typeWriter, 100);
-            }
-        };
-        
-        // Start typewriter after initial reveal
-        setTimeout(typeWriter, index * 800 + 300);
-    });
-}
-
 // Interactive title hover effects
 function addTitleInteractivity() {
     const titleLines = document.querySelectorAll('.title-line');
@@ -364,63 +370,12 @@ function addTitleInteractivity() {
 // Initialize enhanced title animations
 function initEnhancedTitle() {
     createTitleParticles();
-    // enhanceTitleAnimation(); // Uncomment for typewriter effect
     addTitleInteractivity();
 }
 
 // Enhanced Logo Animation System
 function initEnhancedLogo() {
-    createLogoParticles();
     setupLogoInteractions();
-    addLogoCharacters();
-}
-
-// Create floating particles around logo
-function createLogoParticles() {
-    const logoMain = document.querySelector('.logo-main');
-    if (!logoMain) return;
-    
-    const particlesContainer = document.createElement('div');
-    particlesContainer.className = 'logo-particles';
-    logoMain.appendChild(particlesContainer);
-
-    // Create 8 particles around the logo
-    for (let i = 0; i < 8; i++) {
-        createLogoParticle(particlesContainer, i);
-    }
-}
-
-function createLogoParticle(container, index) {
-    const particle = document.createElement('div');
-    particle.className = 'logo-particle';
-    
-    // Position particles around the logo
-    const angle = (index / 8) * Math.PI * 2;
-    const distance = 30;
-    const tx = Math.cos(angle) * distance;
-    const ty = Math.sin(angle) * distance;
-    
-    particle.style.setProperty('--tx', `${tx}px`);
-    particle.style.setProperty('--ty', `${ty}px`);
-    
-    // Random delay and duration
-    const delay = Math.random() * 3;
-    const duration = 3 + Math.random() * 2;
-    
-    particle.style.animationDelay = `${delay}s`;
-    particle.style.animationDuration = `${duration}s`;
-    
-    // Random size and color variation
-    const size = 2 + Math.random() * 2;
-    particle.style.width = `${size}px`;
-    particle.style.height = `${size}px`;
-    
-    // Color variation
-    const colors = ['#8B4513', '#8B4513', '#8B4513', '#A0522D'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    particle.style.background = color;
-    
-    container.appendChild(particle);
 }
 
 // Setup logo hover and click interactions
@@ -431,7 +386,6 @@ function setupLogoInteractions() {
     // Enhanced hover effects
     logoMain.addEventListener('mouseenter', () => {
         logoMain.classList.add('hover');
-        triggerLogoAnimation();
     });
     
     logoMain.addEventListener('mouseleave', () => {
@@ -441,7 +395,6 @@ function setupLogoInteractions() {
     // Click animation
     logoMain.addEventListener('click', (e) => {
         e.preventDefault();
-        triggerLogoClickAnimation();
         
         // Scroll to top with smooth animation
         window.scrollTo({
@@ -455,61 +408,12 @@ function setupLogoInteractions() {
     logoMain.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            triggerLogoClickAnimation();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
     });
-}
-
-// Add individual character spans for letter animations
-function addLogoCharacters() {
-    const logoText = document.querySelector('.logo-text');
-    if (!logoText) return;
-    
-    const text = logoText.textContent;
-    logoText.innerHTML = '';
-    
-    // Create span for each character
-    for (let i = 0; i < text.length; i++) {
-        const charSpan = document.createElement('span');
-        charSpan.className = 'logo-char';
-        charSpan.textContent = text[i];
-        charSpan.style.animationDelay = `${i * 0.1}s`;
-        logoText.appendChild(charSpan);
-    }
-}
-
-// Trigger special logo animation
-function triggerLogoAnimation() {
-    const logoChars = document.querySelectorAll('.logo-char');
-    
-    logoChars.forEach((char, index) => {
-        setTimeout(() => {
-            char.style.animation = 'charBounce 0.6s ease';
-            setTimeout(() => {
-                char.style.animation = '';
-            }, 600);
-        }, index * 50);
-    });
-}
-
-// Logo click animation sequence
-function triggerLogoClickAnimation() {
-    const logoMain = document.querySelector('.logo-main');
-    if (!logoMain) return;
-    
-    // Add loading state
-    logoMain.classList.add('loading');
-    
-    // Simulate loading completion
-    setTimeout(() => {
-        logoMain.classList.remove('loading');
-        logoMain.classList.add('success');
-        
-        // Reset after animation
-        setTimeout(() => {
-            logoMain.classList.remove('success');
-        }, 1000);
-    }, 800);
 }
 
 // Logo scroll effect - subtle scale on scroll
@@ -526,15 +430,39 @@ function initLogoScrollEffect() {
     });
 }
 
+// Image loading handler
+function loadImages() {
+    const images = document.querySelectorAll('img');
+    
+    images.forEach(img => {
+        // Skip if image is already loaded
+        if (img.complete) {
+            img.classList.add('loaded');
+            return;
+        }
+        
+        img.addEventListener('load', function() {
+            this.classList.add('loaded');
+        });
+        
+        img.addEventListener('error', function() {
+            handleImageError(this);
+        });
+    });
+}
+
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize rooms (ONLY ONCE)
+    // Initialize rooms
     createRoomCards();
     
     // Initialize animations
     initEnhancedTitle();
     initEnhancedLogo();
     initLogoScrollEffect();
+    
+    // Load images
+    loadImages();
     
     // Add smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -546,8 +474,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
+                const offsetTop = targetElement.offsetTop - 80;
+                
                 window.scrollTo({
-                    top: targetElement.offsetTop - 80,
+                    top: offsetTop,
                     behavior: 'smooth'
                 });
             }
@@ -654,40 +584,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Facilities Image Loading Handler
-function loadFacilitiesImage() {
-    const facilitiesImage = document.querySelector('.facilities-image .about-img');
-    if (!facilitiesImage) return;
-    
-    const placeholder = facilitiesImage.parentElement;
-    
-    // Create new image to preload
-    const loader = new Image();
-    loader.src = facilitiesImage.src;
-    
-    loader.onload = function() {
-        facilitiesImage.classList.add('loaded');
-        console.log('Facilities image loaded successfully');
-    };
-    
-    loader.onerror = function() {
-        console.warn('Facilities image failed to load:', facilitiesImage.src);
-        facilitiesImage.style.display = 'none';
-        // Ensure the placeholder text is still visible
-        const caption = placeholder.querySelector('p');
-        if (caption) {
-            caption.style.background = 'var(--light-color)';
-            caption.style.color = 'var(--gray-color)';
-        }
-    };
-}
+// Handle window resize
+window.addEventListener('resize', function() {
+    // Reinitialize any layout-dependent features if needed
+});
 
-// Update your DOMContentLoaded to include this:
-document.addEventListener('DOMContentLoaded', () => {
-    createRoomCards();
-    initEnhancedTitle();
-    initEnhancedLogo();
-    initLogoScrollEffect();
-    loadFacilitiesImage(); // Add this line
-    // ... rest of your code
+// Handle orientation change on mobile devices
+window.addEventListener('orientationchange', function() {
+    // Force a repaint to fix any layout issues
+    setTimeout(function() {
+        window.dispatchEvent(new Event('resize'));
+    }, 100);
 });
